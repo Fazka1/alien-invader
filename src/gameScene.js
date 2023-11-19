@@ -77,9 +77,23 @@ export default class gameScene extends Phaser.Scene {
 
     // Set World Bound
     this.player.setCollideWorldBounds(true)
+    this.engine.setCollideWorldBounds(true)
+
+    // Engine Animation
+    this.anims.create({
+      key: 'engine-idle',
+      frames: this.anims.generateFrameNumbers('engine', { start: 0, end: 3 }),
+      frameRate: 10,
+      repeat: -1
+    })
+
+    // Player Animation
   }
 
   movePlayer(player, engine, time){
+    // Play Engine Animation
+    engine.anims.play('engine-idle', true)
+
     if(this.cursor.left.isDown){
       this.player.setVelocityX(-this.speed)
       this.engine.setVelocityX(-this.speed)
