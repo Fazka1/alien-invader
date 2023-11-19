@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
-
+import fallingObject from './fallingObject';
 
 export default class gameScene extends Phaser.Scene {
   constructor() {
-    super('')
+    super('Alien Invader scene')
   }
 
   init(){
@@ -61,11 +61,40 @@ export default class gameScene extends Phaser.Scene {
     // KEYBOARD
     this.cursor = this.input.keyboard.createCursorKeys()
 
+    // METEOR
+    this.meteor = this.physics.add.group({
+      classType: fallingObject,
+      maxSize: 10,
+      runChildUpdate: true,
+    })
+
+    this.time.addEvent({
+      delay: Phaser.Math.Between(1000,5000),
+      callback: this.spawnMeteor,
+      callbackScope: this,
+      loop: true
+    })
+
+    this.scoreLabel = this.add.text(10,10, 'score', {
+      fontSize: '16px',
+      color: 'black',
+      backgroundColor: 'white'
+    }).setDepth(1)
+
+    this.healthLabel = this.add.text(10,30, 'health', {
+      fontSize: '16px',
+      color: 'black',
+      backgroundColor: 'white'
+    })
+
   }
 
   update(time){
     // MOVEMENT
     this.movePlayer(this.player, this.engine, time)
+
+    this.scoreLabel.setText('Score : ' + this.score)
+    this.healthLabel.setText('Health : ' + this.health)
   }
 
   createPlayer(){
@@ -88,6 +117,11 @@ export default class gameScene extends Phaser.Scene {
     })
 
     // Player Animation
+    this.anims.create({
+      key: 'destroyed',
+      frames: this.anims.generateFrameNumbers('player', { start:1, end: 15}),
+      frameRate: 10,
+    })
   }
 
   movePlayer(player, engine, time){
@@ -103,6 +137,20 @@ export default class gameScene extends Phaser.Scene {
     } else {
       this.player.setVelocityX(0)
       this.engine.setVelocityX(0)
+    }
+  }
+
+  spawnMeteor(){
+    const config = {
+      speed: 30,
+      rotation: 0.1
+    }
+    // @ts-ignore
+    const meteor = this.meteor.get(0,0, 'meteor', config)
+    
+    const positionX = Phaser.Math.Between(50, 350)
+    if (meteor) {
+      meteor.spawn(positionX)
     }
   }
 }
