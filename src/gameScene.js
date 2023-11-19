@@ -9,6 +9,7 @@ export default class gameScene extends Phaser.Scene {
   init(){
     this.meteor = undefined
     this.player = undefined
+    this.engine = undefined
     this.bullet = undefined
     this.score = 0
     this.scoreLabel = undefined
@@ -25,20 +26,53 @@ export default class gameScene extends Phaser.Scene {
 
   preload() {
     this.load.image('meteor', 'images/meteor.png')
-    this.load.image('bullet', 'images/bullet.png')
-    this.load.image('Ship Damaged', 'images/Ship Damaged.png')
-    this.load.image('Full health', 'images/Full health.png')
-    this.load.image('Ship Slight damage', 'images/Ship Slight damage.png')
-    this.load.image('Ship Very damaged', 'images/Ship Very damaged.png')
+
+    // Background
     this.load.image('bg', 'images/layers/parallax-space-backgound.png')
+    this.load.image('bg-planet', 'images/layers/parallax-space-big-planet.png')
+    this.load.image('bg-stars', 'images/layers/parallax-space-stars.png')
+    this.load.image('bg-far-planets', 'images/layers/parallax-space-far-planets.png')
+
+    // Ships
+    this.load.spritesheet('player', 'images/Foozle_2DS0013_Void_EnemyFleet_2/Nairan/Destruction/PNGs/Nairan - Bomber -  Destruction.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    })
+    this.load.spritesheet('engine', 'images/Foozle_2DS0013_Void_EnemyFleet_2/Nairan/Engine Effects/PNGs/Nairan - Bomber - Engine.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    })
+
+    // Bullets
+    this.load.spritesheet('bullet', 'images/Foozle_2DS0013_Void_EnemyFleet_2/Nairan/Weapon Effects - Projectiles/PNGs/Nairan - Bolt.png', {
+      frameWidth: 9,
+      frameHeight: 9
+    })
   }
 
   create() {
+    // BACKGROUNDS
     this.add.image(200, 310, 'bg').setScale(2.5)
+    this.add.image(300, 400, 'bg-far-planets')
+    this.add.image(100, 200, 'bg-planet').setScale(1.5)
+    this.add.image(200, 310, 'bg-stars').setScale(2)
 
+    // PLAYER
+    this.createPlayer()
   }
 
   update(time){
     
+  }
+
+  createPlayer(){
+    // Add Player
+    this.player = this.physics.add.sprite(200, 500, 'player')
+
+    // Add Engine
+    this.engine = this.physics.add.sprite(200, 500, 'engine')
+
+    // Set World Bound
+    this.player.setCollideWorldBounds(true)
   }
 }
