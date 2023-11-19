@@ -17,6 +17,7 @@ export default class gameScene extends Phaser.Scene {
     this.healthLabel = undefined
     this.speed = 200
     this.meteorSpeed = 100
+    this.boss = undefined
 
     //key button
     this.cursor = undefined
@@ -45,6 +46,12 @@ export default class gameScene extends Phaser.Scene {
     this.load.spritesheet('bullet', 'images/Foozle_2DS0013_Void_EnemyFleet_2/Nairan/Weapon Effects - Projectiles/PNGs/Nairan - Bolt.png', {
       frameWidth: 9,
       frameHeight: 9
+    })
+
+    //boss
+    this.load.spritesheet('enemyBoss', 'images/Foozle_2DS0013_Void_EnemyFleet_2/Nairan/Destruction/PNGs/Nairan - Dreadnought -  Destruction.png',{
+      frameWidth: 128,
+      frameHeight: 128
     })
   }
 
@@ -153,4 +160,13 @@ export default class gameScene extends Phaser.Scene {
       meteor.spawn(positionX)
     }
   }
+  
+  createBoss(){
+    // Add Boss
+    this.boss = this.physics.add.sprite(200, 500, 'enemyBoss').setFlipY(true)
+
+    // Set World Bound
+    this.boss.setCollideWorldBounds(true)
+  }
+
 }
