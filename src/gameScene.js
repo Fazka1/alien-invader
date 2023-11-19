@@ -15,13 +15,11 @@ export default class gameScene extends Phaser.Scene {
     this.scoreLabel = undefined
     this.health = 3
     this.healthLabel = undefined
-    this.speed = 100
+    this.speed = 200
     this.meteorSpeed = 100
 
     //key button
-    this.leftBtn = undefined
-    this.rightBtn = undefined
-    this.shootButton = undefined
+    this.cursor = undefined
   }
 
   preload() {
@@ -59,10 +57,15 @@ export default class gameScene extends Phaser.Scene {
 
     // PLAYER
     this.createPlayer()
+
+    // KEYBOARD
+    this.cursor = this.input.keyboard.createCursorKeys()
+
   }
 
   update(time){
-    
+    // MOVEMENT
+    this.movePlayer(this.player, this.engine, time)
   }
 
   createPlayer(){
@@ -74,5 +77,18 @@ export default class gameScene extends Phaser.Scene {
 
     // Set World Bound
     this.player.setCollideWorldBounds(true)
+  }
+
+  movePlayer(player, engine, time){
+    if(this.cursor.left.isDown){
+      this.player.setVelocityX(-this.speed)
+      this.engine.setVelocityX(-this.speed)
+    } else if(this.cursor.right.isDown){
+      this.player.setVelocityX(this.speed)
+      this.engine.setVelocityX(this.speed)
+    } else {
+      this.player.setVelocityX(0)
+      this.engine.setVelocityX(0)
+    }
   }
 }
