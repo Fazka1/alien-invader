@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import fallingObject from './fallingObject';
+import Projectiles from './projectile';
 
 export default class gameScene extends Phaser.Scene {
   constructor() {
@@ -10,7 +11,7 @@ export default class gameScene extends Phaser.Scene {
     this.meteor = undefined
     this.player = undefined
     this.engine = undefined
-    this.bullet = undefined
+    this.projectiles = undefined
     this.score = 0
     this.scoreLabel = undefined
     this.health = 3
@@ -18,6 +19,7 @@ export default class gameScene extends Phaser.Scene {
     this.speed = 200
     this.meteorSpeed = 100
     this.boss = undefined
+    this.lastFired = 10
 
     //key button
     this.cursor = undefined
@@ -42,8 +44,8 @@ export default class gameScene extends Phaser.Scene {
       frameHeight: 64
     })
 
-    // Bullets
-    this.load.spritesheet('bullet', 'images/Foozle_2DS0013_Void_EnemyFleet_2/Nairan/Weapon Effects - Projectiles/PNGs/Nairan - Bolt.png', {
+    // Projectiles
+    this.load.spritesheet('projectiles', 'images/Foozle_2DS0013_Void_EnemyFleet_2/Nairan/Weapon Effects - Projectiles/PNGs/Nairan - Bolt.png', {
       frameWidth: 9,
       frameHeight: 9
     })
@@ -94,6 +96,17 @@ export default class gameScene extends Phaser.Scene {
       backgroundColor: 'white'
     })
 
+    this.physics.add.overlap(this.player, this.meteor, this.decreaseLife, null, this)
+    
+    //PROJECTILES
+    this.projectiles = this.physics.add.group({
+      classType: Projectiles,
+      maxSize: 10,
+      runChildUpdate: true
+    })
+
+    this.physics.add.overlap(this.projectiles, this.meteor, this.hitEnemy, null, this)
+
   }
 
   update(time){
@@ -127,7 +140,21 @@ export default class gameScene extends Phaser.Scene {
     this.anims.create({
       key: 'destroyed',
       frames: this.anims.generateFrameNumbers('player', { start:1, end: 15}),
+      frameRate: 5,
+    })
+
+    this.player.on('animationcomplete', function(animation, frame){
+      if (animation.key == 'destroyed'){
+        this.scene.start('game-over-scene')
+      }
+    }, this)
+
+    // Projectile Animation
+    this.anims.create({
+      key: 'shooting',
+      frames: this.anims.generateFrameNumbers('projectiles',{start:0, end: 4}),
       frameRate: 10,
+      repeat: -1
     })
   }
 
@@ -144,6 +171,14 @@ export default class gameScene extends Phaser.Scene {
     } else {
       this.player.setVelocityX(0)
       this.engine.setVelocityX(0)
+    }
+    if ((this.cursor.space.isDown) && time > this.lastFired){
+      const projectile = this.projectiles.get(0, 0, 'projectiles')
+      if (projectile){
+        projectile.fire(this.player.x, this.player.y)
+        this.lastFired = time + 600
+        projectile.anims.play('shooting', true)
+      }
     }
   }
 
@@ -168,5 +203,19 @@ export default class gameScene extends Phaser.Scene {
     // Set World Bound
     this.boss.setCollideWorldBounds(true)
   }
+  
+  hitEnemy(projectile, enemy){
+    projectile.die()
+    enemy.die()
+  }
 
+  decreaseLife(player, enemy){
+    enemy.die()
+    this.health--
+    if (this.health == 0){
+      this.player.anims.play("destroyed", true)
+      this.engine.setVisible(false)
+    }
+
+  }
 }
