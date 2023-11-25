@@ -19,6 +19,8 @@ export default class gameScene extends Phaser.Scene {
     this.speed = 200
     this.meteorSpeed = 100
     this.boss = undefined
+    this.scout = undefined
+
     this.lastFired = 10
 
     //key button
@@ -55,6 +57,13 @@ export default class gameScene extends Phaser.Scene {
       frameWidth: 128,
       frameHeight: 128
     })
+
+    //scout
+    this.load.spritesheet('scout', 'images/Foozle_2DS0013_Void_EnemyFleet_2/Nairan/Destruction/PNGs/Nairan - Scout -  Destruction.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    })
+  
   }
 
   create() {
@@ -84,6 +93,21 @@ export default class gameScene extends Phaser.Scene {
       loop: true
     })
 
+    //SCOUT
+    this.scout = this.physics.add.group({
+      classType: fallingObject,
+      maxSize: 10,
+      runChildUpdate: true,
+      
+    })
+
+    this.time.addEvent({
+      delay: Phaser.Math.Between(500, 1000),
+      callback: this.spawnScout,
+      callbackScope: this,
+      loop: true
+    })
+
     this.scoreLabel = this.add.text(10,10, 'score', {
       fontSize: '16px',
       color: 'black',
@@ -97,6 +121,7 @@ export default class gameScene extends Phaser.Scene {
     })
 
     this.physics.add.overlap(this.player, this.meteor, this.decreaseLife, null, this)
+    this.physics.add.overlap(this.player, this.scout, this.decreaseLife, null, this)
     
     //PROJECTILES
     this.projectiles = this.physics.add.group({
@@ -107,11 +132,27 @@ export default class gameScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.projectiles, this.meteor, this.hitEnemy, null, this)
 
+    this.physics.add.overlap(this.projectiles, this.scout, this.hitScout, null, this)
+
   }
 
   update(time){
     // MOVEMENT
     this.movePlayer(this.player, this.engine, time)
+    
+    if (this.score >= 0 && this.score < 100){
+      this.meteor.setActive(true)
+      this.meteor.setVisible(true)
+      this.scout.setActive(false)
+      this.scout.setVisible(false)
+    } else if(this.score >= 100 && this.score < 200){
+      this.meteor.setActive(false)
+      this.meteor.setVisible(false)
+      this.scout.setActive(true)
+      this.scout.setVisible(true)
+    }
+
+    
 
     this.scoreLabel.setText('Score : ' + this.score)
     this.healthLabel.setText('Health : ' + this.health)
@@ -156,6 +197,13 @@ export default class gameScene extends Phaser.Scene {
       frameRate: 10,
       repeat: -1
     })
+
+    // Scout destroyed
+    this.anims.create({
+      key: 'scoutDestroyed',
+      frames: this.anims.generateFrameNumbers('scout', { start:1, end: 15}),
+      frameRate: 15,
+    })
   }
 
   movePlayer(player, engine, time){
@@ -195,6 +243,21 @@ export default class gameScene extends Phaser.Scene {
       meteor.spawn(positionX)
     }
   }
+
+  spawnScout(){
+    const config = {
+      speed: 150,
+      rotation: 0.1
+    }
+    // @ts-ignore
+    const scout = this.scout.get(0,0, 'scout', config)
+    
+    const positionX = Phaser.Math.Between(50, 350)
+    if (scout) {
+      scout.spawn(positionX)
+      scout.setFlipY(true)
+    }
+  }
   
   createBoss(){
     // Add Boss
@@ -207,6 +270,14 @@ export default class gameScene extends Phaser.Scene {
   hitEnemy(projectile, enemy){
     projectile.die()
     enemy.die()
+    this.score += 10
+  }
+
+  hitScout(projectile, enemy){
+    projectile.die()
+    enemy.die()
+    this.score += 10
+
   }
 
   decreaseLife(player, enemy){
