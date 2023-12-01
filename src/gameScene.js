@@ -20,6 +20,7 @@ export default class gameScene extends Phaser.Scene {
     this.meteorSpeed = 100
     this.boss = undefined
     this.scout = undefined
+    this.scoutHit = false
 
     this.lastFired = 10
 
@@ -57,12 +58,17 @@ export default class gameScene extends Phaser.Scene {
       frameWidth: 128,
       frameHeight: 128
     })
+    this.load.spritesheet('engineBoss', 'images/Foozle_2DS0013_Void_EnemyFleet_2/Nairan/Engine Effects/PNGs/Nairan - Dreadnought - Engine.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    })
 
     //scout
     this.load.spritesheet('scout', 'images/Foozle_2DS0013_Void_EnemyFleet_2/Nairan/Destruction/PNGs/Nairan - Scout -  Destruction.png', {
       frameWidth: 64,
       frameHeight: 64
     })
+    
   
   }
 
@@ -87,7 +93,7 @@ export default class gameScene extends Phaser.Scene {
     })
 
     this.time.addEvent({
-      delay: Phaser.Math.Between(1000,5000),
+      delay: Phaser.Math.Between(1000, 2000),
       callback: this.spawnMeteor,
       callbackScope: this,
       loop: true
@@ -131,7 +137,6 @@ export default class gameScene extends Phaser.Scene {
     })
 
     this.physics.add.overlap(this.projectiles, this.meteor, this.hitEnemy, null, this)
-
     this.physics.add.overlap(this.projectiles, this.scout, this.hitScout, null, this)
 
   }
@@ -151,11 +156,15 @@ export default class gameScene extends Phaser.Scene {
       this.scout.setActive(true)
       this.scout.setVisible(true)
     }
-
-    
-
-    this.scoreLabel.setText('Score : ' + this.score)
-    this.healthLabel.setText('Health : ' + this.health)
+    else if(this.score >= 200){
+      this.meteor.setActive(false)
+      this.meteor.setVisible(false)
+      this.scout.setActive(false)
+      this.scout.setVisible(false)
+      this.createBoss()
+    }
+    this.scoreLabel.setText('Score : ' + this.score).setDepth(1)
+    this.healthLabel.setText('Health : ' + this.health).setDepth(1)
   }
 
   createPlayer(){
@@ -197,13 +206,6 @@ export default class gameScene extends Phaser.Scene {
       frameRate: 10,
       repeat: -1
     })
-
-    // Scout destroyed
-    this.anims.create({
-      key: 'scoutDestroyed',
-      frames: this.anims.generateFrameNumbers('scout', { start:1, end: 15}),
-      frameRate: 15,
-    })
   }
 
   movePlayer(player, engine, time){
@@ -232,7 +234,7 @@ export default class gameScene extends Phaser.Scene {
 
   spawnMeteor(){
     const config = {
-      speed: 30,
+      speed: 60,
       rotation: 0.1
     }
     // @ts-ignore
@@ -245,26 +247,38 @@ export default class gameScene extends Phaser.Scene {
   }
 
   spawnScout(){
-    const config = {
-      speed: 150,
-      rotation: 0.1
-    }
     // @ts-ignore
-    const scout = this.scout.get(0,0, 'scout', config)
-    
-    const positionX = Phaser.Math.Between(50, 350)
-    if (scout) {
-      scout.spawn(positionX)
-      scout.setFlipY(true)
+    if (this.score >= 100 && this.score < 200){
+      const config = {
+        speed: 150
+      }
+
+      // @ts-ignore
+      const scout = this.scout.get(0,0, 'scout', config)
+      
+      const positionX = Phaser.Math.Between(50, 350)
+      if (scout) {
+        scout.spawn(positionX)
+        scout.setFlipY(true)
+      }
+
+      
     }
+    
   }
   
   createBoss(){
     // Add Boss
-    this.boss = this.physics.add.sprite(200, 500, 'enemyBoss').setFlipY(true)
-
+    this.boss = this.physics.add.sprite(200, 100, 'enemyBoss').setFlipY(true)
     // Set World Bound
     this.boss.setCollideWorldBounds(true)
+    // Engine Animation
+    this.anims.create({
+      key: 'engine-idle-boss',
+      frames: this.anims.generateFrameNumbers('engineBoss', { start: 0, end: 3 }),
+      frameRate: 10,
+      repeat: -1
+    })
   }
   
   hitEnemy(projectile, enemy){
@@ -277,7 +291,6 @@ export default class gameScene extends Phaser.Scene {
     projectile.die()
     enemy.die()
     this.score += 10
-
   }
 
   decreaseLife(player, enemy){
