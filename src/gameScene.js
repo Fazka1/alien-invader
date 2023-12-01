@@ -210,7 +210,7 @@ export default class gameScene extends Phaser.Scene {
 
     this.player.on('animationcomplete', function(animation, frame){
       if (animation.key == 'destroyed'){
-        this.scene.start('game-over-scene')
+        this.scene.start('over-scene', {score:this.score})
       }
     }, this)
 
@@ -314,6 +314,7 @@ export default class gameScene extends Phaser.Scene {
     if (this.bossHitCount == 10){
       enemy.die()
       this.score += 100
+      this.scene.start('over-scene', {score:this.score})
     }
   }
 
@@ -323,6 +324,7 @@ export default class gameScene extends Phaser.Scene {
     if (this.health == 0){
       this.player.anims.play("destroyed", true)
       this.engine.setVisible(false)
+     
     }
 
   }

@@ -5,8 +5,9 @@ export default class gameOverScene extends Phaser.Scene
         super('over-scene')
     }
     
-    init(){
+    init(data){
         this.replayButton = undefined
+        this.score = data.score
 
     }
 
@@ -34,7 +35,14 @@ export default class gameOverScene extends Phaser.Scene
             color: 'white'
         })
 
-        this.add.text(120, 320, 'Game Over', {
+        this.add.text(100, 200, 'GAME OVER', {
+            fontSize: '32px',
+            color: 'white',
+            fontFamily: 'arial',
+            fontStyle: 'bold'
+        })
+
+        this.add.text(120, 300, 'Score: ' + this.score, {
             fontSize: '32px',
             color: 'white'
         })

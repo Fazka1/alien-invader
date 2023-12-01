@@ -27,7 +27,7 @@ export default class startScene extends Phaser.Scene
 
         
         this.startButton = this.add.image(200, 500, 'startButton').setInteractive()
-        this.add.text(140, 485, 'start', {
+        this.add.text(150, 485, 'start', {
             fontSize: '32px',
             color: 'white'
         })
@@ -35,9 +35,11 @@ export default class startScene extends Phaser.Scene
             this.scene.start('Alien Invader scene')
         }, this)
 
-        this.add.text(120, 320, 'Game start', {
+        this.add.text(80, 200, 'ALIEN INVADER', {
             fontSize: '32px',
-            color: 'white'
+            color: 'white',
+            fontFamily: 'arial',
+            fontStyle: 'bold'
         })
     }
 }
