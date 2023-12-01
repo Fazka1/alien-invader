@@ -162,6 +162,7 @@ export default class gameScene extends Phaser.Scene {
       this.scout.setActive(false)
       this.scout.setVisible(false)
       this.createBoss()
+      // this.bossMovement()
     }
     this.scoreLabel.setText('Score : ' + this.score).setDepth(1)
     this.healthLabel.setText('Health : ' + this.health).setDepth(1)
@@ -279,6 +280,18 @@ export default class gameScene extends Phaser.Scene {
       frameRate: 10,
       repeat: -1
     })
+  }
+
+  bossMovement(){
+    // Play Engine Animation
+    this.boss.anims.play('engine-idle-boss', true)
+    this.boss.setVelocityX(50)
+    // if boss hit the wall, change direction
+    if (this.boss.x > 350){
+      this.boss.setVelocityX(-50)
+    } else if (this.boss.x < 50){
+      this.boss.setVelocityX(50)
+    }
   }
   
   hitEnemy(projectile, enemy){
