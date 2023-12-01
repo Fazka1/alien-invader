@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import fallingObject from './fallingObject';
 import Projectiles from './projectile';
+import boss from './boss';
 
 export default class gameScene extends Phaser.Scene {
   constructor() {
@@ -21,6 +22,7 @@ export default class gameScene extends Phaser.Scene {
     this.boss = undefined
     this.scout = undefined
     this.scoutHit = false
+    this.bossHitCount = 0
 
     this.lastFired = 10
 
@@ -114,6 +116,19 @@ export default class gameScene extends Phaser.Scene {
       loop: true
     })
 
+    // BOSS
+    this.boss = this.physics.add.group({
+      classType: boss,
+      maxSize: 1,
+      runChildUpdate: true,
+    })
+
+    this.time.addEvent({
+      callback: this.spawnBoss,
+      callbackScope: this,
+      loop: true
+    })
+
     this.scoreLabel = this.add.text(10,10, 'score', {
       fontSize: '16px',
       color: 'black',
@@ -138,6 +153,7 @@ export default class gameScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.projectiles, this.meteor, this.hitEnemy, null, this)
     this.physics.add.overlap(this.projectiles, this.scout, this.hitScout, null, this)
+    this.physics.add.overlap(this.projectiles, this.boss, this.hitBoss, null, this)
 
   }
 
@@ -161,7 +177,6 @@ export default class gameScene extends Phaser.Scene {
       this.meteor.setVisible(false)
       this.scout.setActive(false)
       this.scout.setVisible(false)
-      this.createBoss()
     }
     this.scoreLabel.setText('Score : ' + this.score).setDepth(1)
     this.healthLabel.setText('Health : ' + this.health).setDepth(1)
@@ -261,24 +276,24 @@ export default class gameScene extends Phaser.Scene {
         scout.spawn(positionX)
         scout.setFlipY(true)
       }
-
-      
     }
-    
   }
   
-  createBoss(){
-    // Add Boss
-    this.boss = this.physics.add.sprite(200, 100, 'enemyBoss').setFlipY(true)
-    // Set World Bound
-    this.boss.setCollideWorldBounds(true)
-    // Engine Animation
-    this.anims.create({
-      key: 'engine-idle-boss',
-      frames: this.anims.generateFrameNumbers('engineBoss', { start: 0, end: 3 }),
-      frameRate: 10,
-      repeat: -1
-    })
+  spawnBoss(){
+    if (this.score >= 200){
+      const config = {
+        speed: 100
+      }
+
+      // @ts-ignore
+      const boss = this.boss.get(0, 0, 'enemyBoss', config)
+      
+      const positionX = 50
+      if (boss) {
+        boss.spawn(positionX)
+        boss.setFlipY(true)
+      }
+    }
   }
   
   hitEnemy(projectile, enemy){
@@ -291,6 +306,15 @@ export default class gameScene extends Phaser.Scene {
     projectile.die()
     enemy.die()
     this.score += 10
+  }
+
+  hitBoss(projectile, enemy){
+    projectile.die()
+    this.bossHitCount += 1
+    if (this.bossHitCount == 10){
+      enemy.die()
+      this.score += 100
+    }
   }
 
   decreaseLife(player, enemy){
